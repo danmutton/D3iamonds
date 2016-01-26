@@ -25,6 +25,7 @@
       </section>
       <input id='letter' type="text" placeholder="enter a letter" maxlength=1></input>
       <button onclick="updateChart()">Diamond me</button>
+      <span class="validation-error-msg" style="display: none;">INVALID INPUT</span>
     </article>
 
     <script>
@@ -36,7 +37,12 @@
     function updateChart() {
       var selected = document.getElementById("letter").value.toUpperCase();
       var data = allowed.slice(0, allowed.indexOf(selected) + 1).reverse();
-      if (data == []) {
+      d3.selectAll('.validation-error-msg')
+        .style('display', function() {
+          return data.length === 0 ? 'inline' : 'none';
+        });
+
+      if (data === []) {
         return;
       }
 
