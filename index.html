@@ -1,132 +1,118 @@
 <html>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js"></script>
+    <style>
+    svg {
+      background-color: #CEE2EB;
+    }
+    circle {
+      stroke: #CEE2EB;
+      stroke-width: 2;
+      fill:  white;
+    }
+    text {
+      fill: #CEE2EB;
+    }
+    </style>
   </head>
   <body style="font-family: sans-serif">
     <article>
       <header>
-        <h1>My header</h1>
+        <h1>D3iamonds are 4evs</h1>
       </header>
       <section>
-        <svg width="400" height="400" id="d3amond"></svg>
+        <svg width="500" height="500" viewbox="0 0 300 300" id="d3amond"></svg>
       </section>
       <input id='letter' type="text" placeholder="enter a letter" maxlength=1></input>
-      <button onclick="updateChart()">Click me</button>
+      <button onclick="updateChart()">Diamond me</button>
     </article>
+
     <script>
-    var allowed = ['A', 'B', 'C', 'D', 'E',
-                  'F', 'G','H','I','J','K','L',
-                  'M','N','O','P','Q','R','S',
-                  'T','U','V','W','X','Y','Z'];
-
-    var chartW = 400;
-    var chartH = 400;
     var svg = d3.select('#d3amond');
-    svg.append('rect')
-      .attr('x', 0)
-      .attr('width', chartW)
-      .attr('height', chartH)
-      .style('stroke', 'red')
-      .style('stroke-width', 5)
+    var allowed = ['A', 'B', 'C', 'D', 'E', 'F', 'G','H','I','J','K','L',
+                   'M','N','O','P','Q','R','S', 'T','U','V','W','X','Y','Z'];
+    var animator;
 
-      function updateChart() {
-        svg.selectAll('g')
-          .remove();
-
-        var selected = document.getElementById("letter").value.toUpperCase();
-
-        var data = allowed.slice(0, allowed.indexOf(selected) + 1).reverse();
-        var xM = 1;
-        var yM = 1;
-        var radius = chartW / (data.length * 5);
-        var offsetIncrement = radius * 2;
-
-        quadrant();
-        quadrant();
-        quadrant();
-        quadrant();
-
-        var msg = svg.append('g')
-          .attr('class', 'message')
-          .attr('transform','translate(' + (0.5 * chartW) + ','+ (0.5 * chartH) +')');
-
-        msg.append('circle')
-            .attr('r', 20)
-        msg.append('text')
-            .text(selected)
-            .attr('dx', (-5))
-            .attr('dy', (5));
-
-        setTimeout(function(){
-            doItFull();
-            setInterval(function(){
-              doIt();
-            }, 4000);
-        }, 0);
-
-          function doIt() {
-            d3.transition()
-                .each(function() {
-                  d3.selectAll(".lecircle")
-                    .transition()
-                      .ease("linear")
-                      .duration(600)
-                      .delay(function(d, i) {
-                        return 1000 + (Math.random() *  i * 2000);
-                      })
-                      .attr('r', radius + 4)
-                      .style('fill', 'blue')
-                    .transition()
-                      .ease("linear")
-                      .duration(600)
-                      .attr('r', radius)
-                      .style('fill', 'white')
-
-                })
-          }
-
-          function doItFull() {
-            d3.transition()
-                .each(function() {
-                  d3.selectAll(".lecircle")
-                    .transition()
-                      .ease("linear")
-                      .duration(600)
-                      .delay(function(d, i) {
-                        return i * 100;
-                      })
-                      .attr('r', radius)
-                })
-          }
-
-        function quadrant() {
-          yM *= xM *= -1;
-          var container = svg.append('g');
-          var circles = container.selectAll('g')
-            .data(data)
-            .enter()
-            .append('g')
-            .attr('transform',function(d, i) {
-              var x = (chartW / 2 - ((offsetIncrement - 10) * (data.length-1) * xM)) + (xM * (i) * (offsetIncrement - 10));
-              var y = (chartH / 2) + (yM * (i) * offsetIncrement);
-              return 'translate(' + x + ' ' + y + ')';
-            });
-
-          circles.append('circle')
-              .attr('class', 'lecircle')
-              .attr('r', 0)
-              .style('stroke', 'blue')
-              .style('stroke-width', 3)
-              .style('fill', 'white');
-
-          circles.append('text')
-            .text(function(d) {return d})
-            .attr('dx', (-0.5 * radius))
-            .attr('dy', (0.5 * radius))
-            .style('');
-
-          }
+    function updateChart() {
+      var selected = document.getElementById("letter").value.toUpperCase();
+      var data = allowed.slice(0, allowed.indexOf(selected) + 1).reverse();
+      if (data == []) {
+        return;
       }
+
+      sparkleNoMore();
+      svg.selectAll('g').remove();
+
+      var xOrient = 1;
+      var yOrient = 1;
+      var radius = 70 / data.length;
+      quadrant();
+      quadrant();
+      quadrant();
+      quadrant();
+      animateIn();
+      sparkleSparkle();
+
+      function sparkleNoMore() {
+        if(animator) {
+          clearInterval(animator);
+          animator = undefined;
+        }
+      }
+
+      function sparkleSparkle() {
+        animator = setInterval(function(){
+            d3.selectAll("circle")
+              .transition()
+                .ease("linear")
+                .duration(600)
+                .delay(function(d, i) {
+                  return (Math.random() * (i) * 3000);
+                })
+                .attr('r', radius * 1.5)
+                .style('fill', '#D0CDEF')
+              .transition()
+                .ease("linear")
+                .duration(600)
+                .attr('r', radius)
+                .style('fill', 'white')
+          }, 350 * data.length);
+      }
+
+      function animateIn() {
+        d3.selectAll("circle")
+          .transition()
+            .ease("linear")
+            .duration(500)
+            .delay(function(d, i) {return i * 70;})
+            .attr('r', radius);
+      }
+
+      function quadrant() {
+        yOrient *= xOrient *= -1;
+        var ySpacing = yOrient * (radius * 2);
+        var xSpacing = xOrient * ((radius * 2) - 2);
+
+        var container = svg.append('g');
+        var circles = container.selectAll('g')
+          .data(data)
+          .enter()
+          .append('g')
+          .attr('transform',function(_, i) {
+            var x = 150 - (i * xSpacing) + ((data.length - 1) * xSpacing);
+            var y = 150 + (i * ySpacing);
+            return 'translate(' + x + ' ' + y + ')';
+          });
+        circles.append('circle');
+
+        circles.append('text')
+          .text(function(d) {return d})
+          .attr('dx', (-0.5 * radius))
+          .attr('dy', (0.5 * radius))
+          .attr('text-align', 'start')
+          .style('font-size', 1.5 * radius);
+      }
+    }
     </script>
   </body>
 </html>
